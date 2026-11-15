@@ -679,7 +679,12 @@ $(document).ready(function () {
         var $col = $('<div class="col-12 col-sm-6 col-lg-3 mb-4">');
         var $card = $('<div class="card h-100 api-card">');
 
-        $card.append($('<img class="card-img-top" loading="lazy">').attr('src', book.cover).attr('alt', book.title));
+        if (book.cover) {
+          $card.append($('<img class="card-img-top" loading="lazy">').attr('src', book.cover).attr('alt', book.title));
+        } else {
+          // some books in the API have no cover
+          $card.append('<div class="card-img-top no-cover">No cover</div>');
+        }
 
         var $body = $('<div class="card-body d-flex flex-column">');
         $body.append($('<h5 class="card-title">').text(book.title));
@@ -705,8 +710,23 @@ $(document).ready(function () {
         url = url + '&subject=' + genre; // the API finds only books of this genre
       }
 
+      // the user must write something or choose a genre
+      if (query === '' && genre === '') {
+        $('#api-status').html('<div class="alert alert-warning">Please write a title or an author, or choose a genre.</div>');
+        return;
+      }
+
+      // show a loading message and block the button until the answer comes
+      $('#api-status').html('<div class="spinner-border spinner-border-sm me-2" role="status"></div>Loading books...');
+      $('#api-results').empty();
+      $('#api-form button[type="submit"]').prop('disabled', true);
+
       fetch(url)
         .then(function (response) {
+          // response.ok is false for errors like 404 or 500
+          if (!response.ok) {
+            throw new Error('Server error: ' + response.status);
+          }
           return response.json(); // the answer is JSON text, we turn it into an object
         })
         .then(function (data) {
@@ -716,11 +736,29 @@ $(document).ready(function () {
               title: doc.title,
               author: doc.author_name ? doc.author_name[0] : 'Unknown author',
               year: doc.first_publish_year || 'Unknown',
-              cover: 'https://covers.openlibrary.org/b/id/' + doc.cover_i + '-M.jpg',
+              cover: doc.cover_i ? 'https://covers.openlibrary.org/b/id/' + doc.cover_i + '-M.jpg' : '',
               key: doc.key
             };
           });
+
+          if (apiBooks.length === 0) {
+            $('#api-status').html('<div class="alert alert-info">No books found. Try another word or genre.</div>');
+            return;
+          }
+
+          $('#api-status').text('Found ' + data.numFound + ' books. Here are the first ' + apiBooks.length + '.');
           showSortedBooks();
+        })
+        .catch(function (error) {
+          // no internet, the server is down or the answer is wrong
+          console.log(error);
+          $('#api-status').html(
+            '<div class="alert alert-danger">Sorry, we could not load the books. Please check your internet connection. ' +
+            '<button type="button" class="btn btn-sm btn-outline-danger ms-2" id="api-retry">Try again</button></div>'
+          );
+        })
+        .finally(function () {
+          $('#api-form button[type="submit"]').prop('disabled', false);
         });
     }
 
@@ -751,6 +789,9 @@ $(document).ready(function () {
 
     // sorting does not need a new request, we only change the order
     $('#api-sort').on('change', showSortedBooks);
+
+    // "Try again" button inside the error message
+    $(document).on('click', '#api-retry', searchBooks);
 
     // show some books when the page opens
     $('#api-query').val('classic literature');

@@ -652,6 +652,14 @@ main a:not(.btn):not(.hero-button) {
 .api-card .card-title {
   font-size: 18px;
 }
+.no-cover {
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--block-bg);
+  color: var(--text-secondary);
+}
 
 /* ===== Dark (dimmed) theme =====
    Works when <html data-theme="dark">.
