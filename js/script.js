@@ -647,4 +647,22 @@ $(document).ready(function () {
     $(this).removeClass('is-invalid');
   });
 
+  // ===== FAQ (contact.html) =====
+  // A click on a question opens or closes its answer with slideToggle().
+  $('.faq-question').on('click', function () {
+    var $answer = $(this).next('.faq-answer'); // the answer right after this question
+    var $icon = $(this).find('.faq-icon');
+
+    $answer.slideToggle(300); // smooth sliding animation, 300 ms
+
+    // change the sign: + means closed, − means open
+    if ($icon.text() === '+') {
+      $icon.text('−');
+      $(this).attr('aria-expanded', 'true');
+    } else {
+      $icon.text('+');
+      $(this).attr('aria-expanded', 'false');
+    }
+  });
+
 });
