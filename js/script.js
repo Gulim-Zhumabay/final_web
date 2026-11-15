@@ -1,4 +1,21 @@
 $(document).ready(function () {
+
+  // ===== Login status (works on every page) =====
+  // After sign in we save only the name and the email (no password)
+  // under the key "bookverseCurrentUser".
+  var currentUser = JSON.parse(localStorage.getItem('bookverseCurrentUser'));
+
+  if (currentUser) {
+    // the user is signed in: show his name and a Sign out button in the navbar
+    var $hello = $('<span class="text-light me-2">').text('Hi, ' + currentUser.name + '!');
+    var $signOut = $('<button type="button" id="signout-btn" class="btn btn-outline-light">Sign out</button>');
+    $('#auth-buttons').empty().append($hello, $signOut);
+  }
+
+  $(document).on('click', '#signout-btn', function () {
+    localStorage.removeItem('bookverseCurrentUser'); // clear the saved login state
+    window.location.href = 'index.html';
+  });
   if ($('#search-input').length) {
     var activeCategory = 'all';
 
@@ -155,6 +172,13 @@ $(document).ready(function () {
   }
 
   if ($('#signin-form').length) {
+    // if the user is already signed in, hide the form and show a message
+    if (currentUser) {
+      $('#signin-form').hide();
+      $('#signin-result').html('<div class="alert alert-success">You are already signed in as ' +
+        $('<span>').text(currentUser.email).html() + '.</div>');
+    }
+
     var signinEmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     function setSigninState($input, isOk, message) {
@@ -202,8 +226,19 @@ $(document).ready(function () {
       })[0];
 
       if (user) {
+        // save the login status: only name and email, the password is not saved here
+        localStorage.setItem('bookverseCurrentUser', JSON.stringify({
+          name: user.name,
+          email: user.email
+        }));
+
         $('#signin-result').html('<div class="alert alert-success">Welcome back, ' +
-          $('<span>').text(user.name).html() + '!</div>');
+          $('<span>').text(user.name).html() + '! Opening the home page...</div>');
+
+        // go to the home page after 1.5 seconds
+        setTimeout(function () {
+          window.location.href = 'index.html';
+        }, 1500);
       } else {
         $('#in-password').removeClass('is-valid');
         $('#signin-result').html('<div class="alert alert-danger">Wrong email or password. No account yet? <a href="register.html">Sign up</a></div>');
