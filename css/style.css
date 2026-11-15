@@ -645,6 +645,14 @@ main a:not(.btn):not(.hero-button) {
   margin-bottom: 0;
 }
 
+/* Open Library API (books.html) */
+.api-card .card-img-top {
+  height: 320px;
+}
+.api-card .card-title {
+  font-size: 18px;
+}
+
 /* ===== Dark (dimmed) theme =====
    Works when <html data-theme="dark">.
    We only change the values of the color variables. */

@@ -665,4 +665,68 @@ $(document).ready(function () {
     }
   });
 
+  // ===== Open Library API (books.html) =====
+  if ($('#api-form').length) {
+    var API_URL = 'https://openlibrary.org/search.json';
+    var apiBooks = []; // books from the last search
+
+    // shows an array of books as cards
+    function showApiBooks(list) {
+      var $box = $('#api-results');
+      $box.empty();
+
+      $.each(list, function (index, book) {
+        var $col = $('<div class="col-12 col-sm-6 col-lg-3 mb-4">');
+        var $card = $('<div class="card h-100 api-card">');
+
+        $card.append($('<img class="card-img-top" loading="lazy">').attr('src', book.cover).attr('alt', book.title));
+
+        var $body = $('<div class="card-body d-flex flex-column">');
+        $body.append($('<h5 class="card-title">').text(book.title));
+        $body.append($('<p class="card-text mb-1">').text('Author: ' + book.author));
+        $body.append($('<p class="card-text">').text('Year: ' + book.year));
+        $body.append($('<a class="btn btn-dark mt-auto" target="_blank" rel="noopener">More info</a>')
+          .attr('href', 'https://openlibrary.org' + book.key));
+
+        $card.append($body);
+        $col.append($card);
+        $box.append($col);
+      });
+    }
+
+    // sends a request to the API and shows the result
+    function searchBooks() {
+      var query = $('#api-query').val().trim();
+      var url = API_URL + '?q=' + encodeURIComponent(query) +
+        '&limit=12&fields=key,title,author_name,first_publish_year,cover_i';
+
+      fetch(url)
+        .then(function (response) {
+          return response.json(); // the answer is JSON text, we turn it into an object
+        })
+        .then(function (data) {
+          // data.docs is an array of books; we keep only what we need
+          apiBooks = data.docs.map(function (doc) {
+            return {
+              title: doc.title,
+              author: doc.author_name ? doc.author_name[0] : 'Unknown author',
+              year: doc.first_publish_year || 'Unknown',
+              cover: 'https://covers.openlibrary.org/b/id/' + doc.cover_i + '-M.jpg',
+              key: doc.key
+            };
+          });
+          showApiBooks(apiBooks);
+        });
+    }
+
+    $('#api-form').on('submit', function (e) {
+      e.preventDefault();
+      searchBooks();
+    });
+
+    // show some books when the page opens
+    $('#api-query').val('classic literature');
+    searchBooks();
+  }
+
 });
