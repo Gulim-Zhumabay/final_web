@@ -16,6 +16,8 @@ Every book page has three buttons: read the ebook and listen to the audiobook (l
 
 For the endterm project we made the same website more interactive with JavaScript and jQuery. The topic, the structure and all midterm pages stay the same, and the responsive layout still works. Now visitors can search and filter books, register and sign in, keep their own reading list and look at the book covers in a gallery.
 
+For the final project we added a light and a dark theme, a user menu, a profile page, an FAQ section and books from the Open Library API. The new color palette is the same on every page.
+
 ## Pages
 
 - Home (index.html)
@@ -26,6 +28,7 @@ For the endterm project we made the same website more interactive with JavaScrip
 - Gallery (gallery.html), new in the endterm project
 - Register (register.html), new in the endterm project
 - Sign in (signin.html), new in the endterm project
+- Profile (profile.html), new in the final project
 - Nine book pages: camellia-details.html, brain-details.html, gatsby-details.html, whisperer-details.html, psychology-details.html, eden-details.html, wolf-details.html, rose-details.html, dieu-details.html (we will add more books later)
 
 ## Features implemented
@@ -53,6 +56,17 @@ Endterm project:
 - Image gallery with lightbox on the gallery page: a grid of 18 book covers. A click opens the cover bigger, arrows and keyboard keys move to the next or the previous cover, and the jQuery effects fadeIn, fadeOut and animate make everything smooth.
 - All the JavaScript code is in the file js/script.js
 
+Final project:
+
+- Sign in with validation: the email and the password are checked while the user types and after clicking Sign in. The sign in page finds the user among the registered users.
+- Login status in localStorage: after sign in only the name and the email are saved (no password), so the user stays signed in after refreshing the page.
+- User menu: for a signed-in user the Sign in and Sign up buttons change to a user icon. The menu has Profile, Theme: Light, Theme: Dark and Log out. Log out clears the saved login state.
+- Light and dark theme: the chosen theme is saved in localStorage and works on every page after refreshing. All colors are CSS variables, and the dark theme only gives them new values.
+- Profile page: the user can change the first name, the last name, the birthday and the favorite genres (and add their own genres). The email cannot be changed. The page shows the current membership plan, and the plan chosen on the membership page is saved here. The account can be deleted after a second confirmation in a modal window.
+- Wishlist: the reading list moved from the categories page to the profile page. Now every user has their own wishlist.
+- FAQ on the contact page: 7 questions about the website. A click on a question opens or closes the answer with jQuery slideToggle(), and the sign changes between + and −.
+- Open Library API on the books page: books are loaded with fetch() and shown as cards with a cover, an author and a year. The user can search, choose a genre, sort the results and add a book to the wishlist. There is a loading message, and errors (no internet, a server error, nothing found) are shown on the page with a Try again button.
+
 ## Technologies used
 
 - HTML5
@@ -60,7 +74,9 @@ Endterm project:
 - Bootstrap 5 (grid system, navbar, cards, table, forms, modal window, buttons, utility classes)
 - Bootstrap JavaScript bundle (for the collapsing mobile menu and the modal window)
 - JavaScript (DOM, events, regular expressions, localStorage, JSON)
-- jQuery (events, fadeIn, fadeOut, animate)
+- jQuery (events, fadeIn, fadeOut, animate, slideToggle)
+- CSS variables for the light and the dark theme
+- Fetch API, Open Library Search API (https://openlibrary.org/developers/api)
 - Git and GitHub
 
 ## Individual contribution
@@ -79,6 +95,17 @@ Endterm project:
 - Aktanbi Kusman: He made the reading list with add, edit and delete on the categories page and the gallery page with the lightbox.
 - We tested the website together on a computer and on a phone and published it on GitHub Pages.
 
+Final project:
+
+
+## AI usage
+
+We used AI (Claude) as an assistant for choosing the color palette of pages. 
+
 ## Published website
 
-https://gulim-zhumabay.github.io/midterm_web/
+https://gulim-zhumabay.github.io/final_web/
+
+## GitHub repository
+
+https://github.com/Gulim-Zhumabay/final_web

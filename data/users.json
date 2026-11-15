@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Gulim",
+    "lastName": "Zhumabay",
+    "email": "gulim@mail.com",
+    "password": "qwerty123",
+    "birthday": "2007-11-12",
+    "genres": ["Fiction", "Detectives"],
+    "plan": "Standard — 5 000 ₸ / month"
+  },
+  {
+    "name": "Aiymay",
+    "lastName": "Tleu",
+    "email": "aiymay@mail.com",
+    "password": "qwerty123",
+    "birthday": "2006-09-25",
+    "genres": ["Romance", "Psychology"],
+    "plan": "Premium — 7 500 ₸ / month"
+  },
+  {
+    "name": "Aktanbi",
+    "lastName": "Kusman",
+    "email": "aktanbi@mail.com",
+    "password": "qwerty123",
+    "birthday": "2008-02-03",
+    "genres": ["Business"],
+    "plan": "Basic — 3 000 ₸ / month"
+  }
+]

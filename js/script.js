@@ -24,6 +24,38 @@ $(document).ready(function () {
   // under the key "bookverseCurrentUser".
   var currentUser = JSON.parse(localStorage.getItem('bookverseCurrentUser'));
 
+  // ===== Demo accounts from data/users.json =====
+  // The first time the site opens, we load the demo accounts with fetch()
+  // and add them to the users in localStorage. After that the key
+  // "bookverseDemoLoaded" is saved, so we do not load them again
+  // (and a deleted demo account does not come back).
+  if (!localStorage.getItem('bookverseDemoLoaded')) {
+    fetch('data/users.json')
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error('Could not load users.json: ' + response.status);
+        }
+        return response.json();
+      })
+      .then(function (demoUsers) {
+        var users = getUsers();
+
+        $.each(demoUsers, function (index, demo) {
+          // add the demo user only if this email is not registered yet
+          var exists = users.filter(function (u) { return u.email === demo.email; }).length > 0;
+          if (!exists) {
+            users.push(demo);
+          }
+        });
+
+        saveUsers(users);
+        localStorage.setItem('bookverseDemoLoaded', 'yes');
+      })
+      .catch(function (error) {
+        console.log(error); // the site still works, only without demo accounts
+      });
+  }
+
   if (currentUser) {
     // the user is signed in: instead of Sign in / Sign up show a user icon with a menu
     var menu =
