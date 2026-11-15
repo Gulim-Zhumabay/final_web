@@ -1,3 +1,22 @@
+// ===== Light / Dark theme (works on every page) =====
+// The theme is saved in localStorage under the key "bookverseTheme".
+// We put data-theme="light" or "dark" on the <html> tag.
+// css/style.css changes the color variables by this attribute.
+function applyTheme(theme) {
+  $('html').attr('data-theme', theme);
+}
+
+applyTheme(localStorage.getItem('bookverseTheme') || 'light'); // runs right away, before the page is shown
+
+// ===== Helpers for the list of registered users =====
+function getUsers() {
+  return JSON.parse(localStorage.getItem('bookverseUsers')) || [];
+}
+
+function saveUsers(users) {
+  localStorage.setItem('bookverseUsers', JSON.stringify(users));
+}
+
 $(document).ready(function () {
 
   // ===== Login status (works on every page) =====
@@ -6,12 +25,47 @@ $(document).ready(function () {
   var currentUser = JSON.parse(localStorage.getItem('bookverseCurrentUser'));
 
   if (currentUser) {
-    // the user is signed in: show his name and a Sign out button in the navbar
-    var $hello = $('<span class="text-light me-2">').text('Hi, ' + currentUser.name + '!');
-    var $signOut = $('<button type="button" id="signout-btn" class="btn btn-outline-light">Sign out</button>');
-    $('#auth-buttons').empty().append($hello, $signOut);
+    // the user is signed in: instead of Sign in / Sign up show a user icon with a menu
+    var menu =
+      '<div class="dropdown">' +
+        '<button type="button" class="btn btn-outline-light user-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">' +
+            '<path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>' +
+            '<path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>' +
+          '</svg>' +
+        '</button>' +
+        '<ul class="dropdown-menu dropdown-menu-end">' +
+          '<li><span class="dropdown-item-text fw-bold" id="menu-name"></span></li>' +
+          '<li><hr class="dropdown-divider"></li>' +
+          '<li><a class="dropdown-item" href="profile.html">Profile</a></li>' +
+          '<li><button type="button" class="dropdown-item theme-btn" data-theme="light">Theme: Light</button></li>' +
+          '<li><button type="button" class="dropdown-item theme-btn" data-theme="dark">Theme: Dark</button></li>' +
+          '<li><hr class="dropdown-divider"></li>' +
+          '<li><button type="button" class="dropdown-item" id="signout-btn">Log out</button></li>' +
+        '</ul>' +
+      '</div>';
+
+    $('#auth-buttons').html(menu);
+    $('#menu-name').text(currentUser.name); // .text() so the name is shown as plain text
+    markActiveTheme();
   }
 
+  // show which theme is active in the menu
+  function markActiveTheme() {
+    var theme = $('html').attr('data-theme');
+    $('.theme-btn').removeClass('active');
+    $('.theme-btn[data-theme="' + theme + '"]').addClass('active');
+  }
+
+  // click on "Theme: Light" or "Theme: Dark"
+  $(document).on('click', '.theme-btn', function () {
+    var theme = $(this).attr('data-theme');
+    localStorage.setItem('bookverseTheme', theme); // save the choice
+    applyTheme(theme);
+    markActiveTheme();
+  });
+
+  // click on "Log out"
   $(document).on('click', '#signout-btn', function () {
     localStorage.removeItem('bookverseCurrentUser'); // clear the saved login state
     window.location.href = 'index.html';
@@ -143,7 +197,7 @@ $(document).ready(function () {
 
       if (nameOk && emailOk && passwordOk && confirmOk) {
         // save the new user in localStorage (demo only, no server)
-        var users = JSON.parse(localStorage.getItem('bookverseUsers')) || [];
+        var users = getUsers();
         var email = $('#reg-email').val().trim().toLowerCase();
 
         var exists = users.filter(function (u) { return u.email === email; }).length > 0;
@@ -158,7 +212,7 @@ $(document).ready(function () {
           email: email,
           password: $('#reg-password').val()
         });
-        localStorage.setItem('bookverseUsers', JSON.stringify(users));
+        saveUsers(users);
 
         $('#register-result').html('<div class="alert alert-success">Welcome, ' +
           $('<span>').text($('#reg-name').val().trim()).html() + '! Your account is created.</div>');
@@ -219,7 +273,7 @@ $(document).ready(function () {
 
       var email = $('#in-email').val().trim().toLowerCase();
       var password = $('#in-password').val();
-      var users = JSON.parse(localStorage.getItem('bookverseUsers')) || [];
+      var users = getUsers();
 
       var user = users.filter(function (u) {
         return u.email === email && u.password === password;
@@ -246,8 +300,9 @@ $(document).ready(function () {
     });
   }
 
-  if ($('#list-body').length) {
-    var STORAGE_KEY = 'bookverseReadingList';
+  if ($('#list-body').length && currentUser) {
+    // every user has his own wishlist, so the key contains the email
+    var STORAGE_KEY = 'bookverseWishlist_' + currentUser.email;
 
     var defaultBooks = [
       { id: 1, title: 'Martin Eden', author: 'Jack London', category: 'Fiction', status: 'Finished' },
@@ -425,5 +480,171 @@ $(document).ready(function () {
       if (e.key === 'Escape') closeLightbox();
     });
   }
+
+  // ===== Profile page =====
+  if ($('#profile-form').length) {
+    if (!currentUser) {
+      $('#profile-guest').show(); // not signed in: show only the message
+    } else {
+      $('#profile-content').show();
+
+      var users = getUsers();
+      // find the signed-in user in the list of all users
+      var me = users.filter(function (u) { return u.email === currentUser.email; })[0];
+
+      if (!me) {
+        // the account does not exist anymore: sign out
+        localStorage.removeItem('bookverseCurrentUser');
+        window.location.href = 'signin.html';
+        return;
+      }
+
+      // fill the form with the saved data
+      $('#pf-first').val(me.name);
+      $('#pf-last').val(me.lastName || '');
+      $('#pf-email').val(me.email);
+      $('#pf-birthday').val(me.birthday || '');
+      $('#current-plan').text(me.plan || 'No plan');
+
+      // returns true if this genre already has a checkbox (big and small letters do not matter)
+      function genreExists(name) {
+        var found = false;
+        $('.genre-check').each(function () {
+          if ($(this).val().toLowerCase() === name.toLowerCase()) found = true;
+        });
+        return found;
+      }
+
+      // creates a new checked checkbox for a genre written by the user
+      function addGenreCheckbox(name) {
+        var $label = $('<label class="form-check">');
+        var $input = $('<input type="checkbox" class="form-check-input genre-check" checked>').val(name);
+        $label.append($input, $('<span>').text(' ' + name)); // .text() so the name is plain text
+        $('#genre-list').append($label);
+      }
+
+      var genres = me.genres || [];
+      $('.genre-check').each(function () {
+        $(this).prop('checked', genres.indexOf($(this).val()) !== -1);
+      });
+
+      // genres that the user added before are not in the HTML, so we create them
+      $.each(genres, function (index, name) {
+        if (!genreExists(name)) addGenreCheckbox(name);
+      });
+
+      // "Add" button for the "Other genre" field
+      $('#add-genre-btn').on('click', function () {
+        var name = $('#other-genre').val().trim();
+
+        if (name === '') {
+          $('#genre-error').text('Please write a genre.');
+          return;
+        }
+        if (name.length > 30) {
+          $('#genre-error').text('The genre name is too long.');
+          return;
+        }
+        if (genreExists(name)) {
+          $('#genre-error').text('This genre is already in the list.');
+          return;
+        }
+
+        addGenreCheckbox(name);
+        $('#other-genre').val('');
+        $('#genre-error').text('');
+      });
+
+      // Enter in the "Other genre" field adds the genre (and does not send the whole form)
+      $('#other-genre').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          $('#add-genre-btn').click();
+        }
+      });
+
+      // save the changes
+      $('#profile-form').on('submit', function (e) {
+        e.preventDefault();
+
+        var first = $('#pf-first').val().trim();
+        var birthday = $('#pf-birthday').val(); // text like "2005-03-21" or ""
+        var today = new Date().toISOString().slice(0, 10);
+
+        var firstOk = first.length >= 2;
+        $('#pf-first').toggleClass('is-invalid', !firstOk);
+        $('#pf-first').siblings('.invalid-feedback').text('The first name must have at least 2 letters.');
+
+        var birthdayOk = birthday === '' || birthday <= today;
+        $('#pf-birthday').toggleClass('is-invalid', !birthdayOk);
+        $('#pf-birthday').siblings('.invalid-feedback').text('The birthday cannot be in the future.');
+
+        if (!firstOk || !birthdayOk) {
+          $('#profile-result').html('<div class="alert alert-danger">Please fix the red fields.</div>');
+          return;
+        }
+
+        // collect the checked genres into an array
+        var checkedGenres = [];
+        $('.genre-check:checked').each(function () {
+          checkedGenres.push($(this).val());
+        });
+
+        me.name = first;
+        me.lastName = $('#pf-last').val().trim();
+        me.birthday = birthday;
+        me.genres = checkedGenres;
+        saveUsers(users); // "me" is an object inside "users", so the list is changed too
+
+        // the name can change, so update the login info and the menu too
+        currentUser.name = first;
+        localStorage.setItem('bookverseCurrentUser', JSON.stringify(currentUser));
+        $('#menu-name').text(first);
+
+        $('#profile-result').html('<div class="alert alert-success">Your profile is saved.</div>');
+      });
+
+      // delete account: first click opens the modal, the second click deletes
+      var deleteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal'));
+
+      $('#delete-account-btn').on('click', function () {
+        deleteModal.show();
+      });
+
+      $('#confirm-delete-btn').on('click', function () {
+        var otherUsers = users.filter(function (u) { return u.email !== currentUser.email; });
+        saveUsers(otherUsers);
+        localStorage.removeItem('bookverseWishlist_' + currentUser.email);
+        localStorage.removeItem('bookverseCurrentUser');
+        window.location.href = 'index.html';
+      });
+    }
+  }
+
+  // ===== Membership page: save the plan for a signed-in user =====
+  $('#plan-continue').on('click', function (e) {
+    if (!currentUser) return; // not signed in: the link opens register.html as before
+
+    e.preventDefault();
+    var plan = $('#plan').val();
+
+    if (plan === '') {
+      $('#plan').addClass('is-invalid');
+      return;
+    }
+
+    var users = getUsers();
+    $.each(users, function (index, u) {
+      if (u.email === currentUser.email) {
+        u.plan = plan;
+      }
+    });
+    saveUsers(users);
+    window.location.href = 'profile.html';
+  });
+
+  $('#plan').on('change', function () {
+    $(this).removeClass('is-invalid');
+  });
 
 });
