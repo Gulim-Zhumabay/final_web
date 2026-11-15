@@ -125,6 +125,24 @@ $(document).ready(function () {
       var confirmOk = checkConfirm();
 
       if (nameOk && emailOk && passwordOk && confirmOk) {
+        // save the new user in localStorage (demo only, no server)
+        var users = JSON.parse(localStorage.getItem('bookverseUsers')) || [];
+        var email = $('#reg-email').val().trim().toLowerCase();
+
+        var exists = users.filter(function (u) { return u.email === email; }).length > 0;
+        if (exists) {
+          setState($('#reg-email'), false, 'This email is already registered.');
+          $('#register-result').html('<div class="alert alert-danger">This email is already registered. Please sign in.</div>');
+          return;
+        }
+
+        users.push({
+          name: $('#reg-name').val().trim(),
+          email: email,
+          password: $('#reg-password').val()
+        });
+        localStorage.setItem('bookverseUsers', JSON.stringify(users));
+
         $('#register-result').html('<div class="alert alert-success">Welcome, ' +
           $('<span>').text($('#reg-name').val().trim()).html() + '! Your account is created.</div>');
         this.reset();
@@ -132,6 +150,63 @@ $(document).ready(function () {
         showStrength();
       } else {
         $('#register-result').html('<div class="alert alert-danger">Please fix the red fields and try again.</div>');
+      }
+    });
+  }
+
+  if ($('#signin-form').length) {
+    var signinEmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function setSigninState($input, isOk, message) {
+      $input.removeClass('is-valid is-invalid').addClass(isOk ? 'is-valid' : 'is-invalid');
+      if (!isOk) {
+        $input.siblings('.invalid-feedback').text(message);
+      }
+      return isOk;
+    }
+
+    function checkSigninEmail() {
+      var email = $('#in-email').val().trim();
+      if (email === '') return setSigninState($('#in-email'), false, 'Please enter your email.');
+      if (!signinEmailPattern.test(email)) return setSigninState($('#in-email'), false, 'Use a format like name@gmail.com.');
+      return setSigninState($('#in-email'), true);
+    }
+
+    function checkSigninPassword() {
+      var password = $('#in-password').val();
+      if (password === '') return setSigninState($('#in-password'), false, 'Please enter your password.');
+      if (password.length < 8) return setSigninState($('#in-password'), false, 'The password has at least 8 characters.');
+      return setSigninState($('#in-password'), true);
+    }
+
+    $('#in-email').on('input', checkSigninEmail);
+    $('#in-password').on('input', checkSigninPassword);
+
+    $('#signin-form').on('submit', function (e) {
+      e.preventDefault();
+
+      var emailOk = checkSigninEmail();
+      var passwordOk = checkSigninPassword();
+
+      if (!emailOk || !passwordOk) {
+        $('#signin-result').html('<div class="alert alert-danger">Please fix the red fields and try again.</div>');
+        return;
+      }
+
+      var email = $('#in-email').val().trim().toLowerCase();
+      var password = $('#in-password').val();
+      var users = JSON.parse(localStorage.getItem('bookverseUsers')) || [];
+
+      var user = users.filter(function (u) {
+        return u.email === email && u.password === password;
+      })[0];
+
+      if (user) {
+        $('#signin-result').html('<div class="alert alert-success">Welcome back, ' +
+          $('<span>').text(user.name).html() + '!</div>');
+      } else {
+        $('#in-password').removeClass('is-valid');
+        $('#signin-result').html('<div class="alert alert-danger">Wrong email or password. No account yet? <a href="register.html">Sign up</a></div>');
       }
     });
   }
