@@ -670,6 +670,17 @@ $(document).ready(function () {
     var API_URL = 'https://openlibrary.org/search.json';
     var apiBooks = []; // books from the last search
 
+    // the wishlist of the signed-in user (the same list as on the profile page)
+    function getWishlist() {
+      return JSON.parse(localStorage.getItem('bookverseWishlist_' + currentUser.email)) || [];
+    }
+
+    function isInWishlist(title, author) {
+      return getWishlist().filter(function (b) {
+        return b.title === title && b.author === author;
+      }).length > 0;
+    }
+
     // shows an array of books as cards
     function showApiBooks(list) {
       var $box = $('#api-results');
@@ -692,6 +703,17 @@ $(document).ready(function () {
         $body.append($('<p class="card-text">').text('Year: ' + book.year));
         $body.append($('<a class="btn btn-dark mt-auto" target="_blank" rel="noopener">More info</a>')
           .attr('href', 'https://openlibrary.org' + book.key));
+
+        if (!currentUser) {
+          // a guest cannot have a wishlist
+          $body.append('<a class="btn btn-outline-dark mt-2" href="signin.html">Sign in to save</a>');
+        } else if (isInWishlist(book.title, book.author)) {
+          $body.append('<button type="button" class="btn btn-outline-dark mt-2" disabled>In your wishlist</button>');
+        } else {
+          $body.append($('<button type="button" class="btn btn-outline-dark mt-2 add-wish-btn">Add to wishlist</button>')
+            .attr('data-title', book.title)
+            .attr('data-author', book.author));
+        }
 
         $card.append($body);
         $col.append($card);
@@ -792,6 +814,26 @@ $(document).ready(function () {
 
     // "Try again" button inside the error message
     $(document).on('click', '#api-retry', searchBooks);
+
+    // "Add to wishlist" button on a card
+    $('#api-results').on('click', '.add-wish-btn', function () {
+      var title = $(this).attr('data-title');
+      var author = $(this).attr('data-author');
+      var list = getWishlist();
+
+      if (!isInWishlist(title, author)) {
+        list.push({
+          id: Date.now(),
+          title: title,
+          author: author,
+          category: 'Other',
+          status: 'Want to read'
+        });
+        localStorage.setItem('bookverseWishlist_' + currentUser.email, JSON.stringify(list));
+      }
+
+      $(this).text('Added to wishlist').prop('disabled', true);
+    });
 
     // show some books when the page opens
     $('#api-query').val('classic literature');
