@@ -171,6 +171,30 @@
             <input type="search" id="api-query" class="form-control" placeholder="Title or author, e.g. Jack London" aria-label="Search books in Open Library">
             <button type="submit" class="btn book-button">Search</button>
         </div>
+        <div class="row g-2 mt-1">
+            <div class="col-12 col-sm-6">
+                <label for="api-genre" class="form-label">Genre</label>
+                <select id="api-genre" class="form-select">
+                    <option value="">All genres</option>
+                    <option value="fiction">Fiction</option>
+                    <option value="mystery">Mystery</option>
+                    <option value="romance">Romance</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="history">History</option>
+                    <option value="psychology">Psychology</option>
+                    <option value="business">Business</option>
+                </select>
+            </div>
+            <div class="col-12 col-sm-6">
+                <label for="api-sort" class="form-label">Sort by</label>
+                <select id="api-sort" class="form-select">
+                    <option value="relevance">Relevance</option>
+                    <option value="title">Title A-Z</option>
+                    <option value="new">Newest first</option>
+                    <option value="old">Oldest first</option>
+                </select>
+            </div>
+        </div>
     </form>
     <div id="api-results" class="row"></div>
 </section>

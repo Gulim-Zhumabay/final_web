@@ -697,8 +697,13 @@ $(document).ready(function () {
     // sends a request to the API and shows the result
     function searchBooks() {
       var query = $('#api-query').val().trim();
+      var genre = $('#api-genre').val();
       var url = API_URL + '?q=' + encodeURIComponent(query) +
         '&limit=12&fields=key,title,author_name,first_publish_year,cover_i';
+
+      if (genre !== '') {
+        url = url + '&subject=' + genre; // the API finds only books of this genre
+      }
 
       fetch(url)
         .then(function (response) {
@@ -715,14 +720,37 @@ $(document).ready(function () {
               key: doc.key
             };
           });
-          showApiBooks(apiBooks);
+          showSortedBooks();
         });
+    }
+
+    // sorts a copy of the books (the API order stays in apiBooks) and shows them
+    function showSortedBooks() {
+      var sort = $('#api-sort').val();
+      var list = apiBooks.slice(); // a copy of the array
+
+      if (sort === 'title') {
+        list.sort(function (a, b) { return a.title.localeCompare(b.title); });
+      } else if (sort === 'new') {
+        list.sort(function (a, b) { return (Number(b.year) || 0) - (Number(a.year) || 0); });
+      } else if (sort === 'old') {
+        // books without a year go to the end
+        list.sort(function (a, b) { return (Number(a.year) || 9999) - (Number(b.year) || 9999); });
+      }
+
+      showApiBooks(list);
     }
 
     $('#api-form').on('submit', function (e) {
       e.preventDefault();
       searchBooks();
     });
+
+    // a new genre needs a new request to the API
+    $('#api-genre').on('change', searchBooks);
+
+    // sorting does not need a new request, we only change the order
+    $('#api-sort').on('change', showSortedBooks);
 
     // show some books when the page opens
     $('#api-query').val('classic literature');
