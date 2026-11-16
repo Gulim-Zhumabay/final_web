@@ -97,7 +97,7 @@ Endterm project:
 
 Final project:
 
-- Gulim Zhumabay: Implement Sign-in functionality using localStorage.
+- Gulim Zhumabay: Implement Sign-in functionality using localStorage. Profile page implementation.
 - Aiymay Tleu: API Integration part.
 - Aktanbi Kusman: Create an FAQ section containing questions with +- open/close; Implement a Light/Dark Theme Toggle,
 
