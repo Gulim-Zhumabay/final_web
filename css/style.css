@@ -1,22 +1,19 @@
 :root {
-  /* ===== Colors of the light theme =====
-     All colors of the site are here. The dark theme (at the end of the file)
-     only gives new values to the same variables. */
-  --page-bg: #F5EFE1;        /* page background (cream) */
-  --card-bg: #FFFDF8;        /* cards, tables, forms */
-  --block-bg: #E5D3AF;       /* blocks like contact info (sand) */
-  --text: #2B1A1A;           /* main text */
-  --text-secondary: #6B5A52; /* secondary text */
-  --heading: #790D16;        /* headings (bordo) */
-  --button: #790D16;         /* buttons */
-  --button-hover: #5A0A11;   /* buttons on hover */
-  --button-text: #FFFDF8;    /* text on buttons */
-  --navbar: #790D16;         /* navbar (bordo) */
-  --navbar-hover: #4F080E;   /* navbar links on hover */
-  --border: #D9C7A3;         /* borders */
-  --link: #3F6D8F;           /* links, underlines, focus */
+  --page-bg: #F5EFE1;        
+  --card-bg: #FFFDF8;        
+  --block-bg: #E5D3AF;       
+  --text: #2B1A1A;           
+  --text-secondary: #6B5A52; 
+  --heading: #790D16;        
+  --button: #790D16;         
+  --button-hover: #5A0A11;   
+  --button-text: #FFFDF8;    
+  --navbar: #790D16;         
+  --navbar-hover: #4F080E;   
+  --border: #D9C7A3;         
+  --link: #3F6D8F;           
 
-  /* Bootstrap uses these variables too */
+  
   --bs-body-bg: var(--page-bg);
   --bs-body-color: var(--text);
   --bs-border-color: var(--border);
@@ -433,9 +430,6 @@ textarea.form-control {
   }
 }
 
-/* ===== Endterm additions ===== */
-
-/* books.html: search and filters */
 .filter-bar {
   max-width: 700px;
   margin: 0 auto;
@@ -446,12 +440,10 @@ textarea.form-control {
   color: var(--button-text);
 }
 
-/* register.html */
 .register-box {
   max-width: 500px;
 }
 
-/* gallery.html */
 .gallery-item {
   width: 100%;
   height: 320px;
@@ -516,9 +508,6 @@ textarea.form-control {
   .lightbox-btn { font-size: 2.2rem; padding: 6px 12px; }
 }
 
-/* ===== Final additions ===== */
-
-/* user menu in the navbar */
 .user-btn {
   border-radius: 50%;
   padding: 6px 10px;
@@ -529,7 +518,6 @@ textarea.form-control {
   color: var(--button-text);
 }
 
-/* profile.html */
 .profile-box {
   background-color: var(--card-bg);
   border: 1px solid var(--border);
@@ -552,7 +540,6 @@ textarea.form-control {
   color: var(--button-text);
 }
 
-/* the same colors for Bootstrap parts */
 .card,
 .modal-content,
 .dropdown-menu {
@@ -601,7 +588,6 @@ main a:not(.btn):not(.hero-button) {
   color: var(--link);
 }
 
-/* FAQ (contact.html) */
 .faq-list {
   max-width: 800px;
   margin: 0 auto;
@@ -637,7 +623,7 @@ main a:not(.btn):not(.hero-button) {
   line-height: 1;
 }
 .faq-answer {
-  display: none; /* answers are closed at the start */
+  display: none; 
   padding: 0 20px 16px;
 }
 .faq-answer p {
@@ -645,7 +631,6 @@ main a:not(.btn):not(.hero-button) {
   margin-bottom: 0;
 }
 
-/* Open Library API (books.html) */
 .api-card .card-img-top {
   height: 320px;
 }
@@ -661,20 +646,17 @@ main a:not(.btn):not(.hero-button) {
   color: var(--text-secondary);
 }
 
-/* ===== Dark (dimmed) theme =====
-   Works when <html data-theme="dark">.
-   We only change the values of the color variables. */
 [data-theme="dark"] {
-  --page-bg: #CDB98F;        /* dark sand */
-  --card-bg: #E5D3AF;        /* sand */
-  --block-bg: #9DB8CB;       /* muted blue */
+  --page-bg: #CDB98F;       
+  --card-bg: #E5D3AF;        
+  --block-bg: #9DB8CB;      
   --text: #2E0A0F;
   --text-secondary: #5C2A30;
-  --heading: #790D16;        /* bordo */
+  --heading: #790D16;    
   --button: #790D16;
   --button-hover: #5A0A11;
   --button-text: #FFFDF8;
-  --navbar: #5A0A11;         /* darker bordo */
+  --navbar: #5A0A11;      
   --navbar-hover: #3F070C;
   --border: #A8946B;
   --link: #264C69;

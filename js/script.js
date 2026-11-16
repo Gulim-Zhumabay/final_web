@@ -1,14 +1,9 @@
-// ===== Light / Dark theme (works on every page) =====
-// The theme is saved in localStorage under the key "bookverseTheme".
-// We put data-theme="light" or "dark" on the <html> tag.
-// css/style.css changes the color variables by this attribute.
 function applyTheme(theme) {
   $('html').attr('data-theme', theme);
 }
 
-applyTheme(localStorage.getItem('bookverseTheme') || 'light'); // runs right away, before the page is shown
+applyTheme(localStorage.getItem('bookverseTheme') || 'light'); 
 
-// ===== Helpers for the list of registered users =====
 function getUsers() {
   return JSON.parse(localStorage.getItem('bookverseUsers')) || [];
 }
@@ -19,16 +14,8 @@ function saveUsers(users) {
 
 $(document).ready(function () {
 
-  // ===== Login status (works on every page) =====
-  // After sign in we save only the name and the email (no password)
-  // under the key "bookverseCurrentUser".
   var currentUser = JSON.parse(localStorage.getItem('bookverseCurrentUser'));
 
-  // ===== Demo accounts from data/users.json =====
-  // The first time the site opens, we load the demo accounts with fetch()
-  // and add them to the users in localStorage. After that the key
-  // "bookverseDemoLoaded" is saved, so we do not load them again
-  // (and a deleted demo account does not come back).
   if (!localStorage.getItem('bookverseDemoLoaded')) {
     fetch('data/users.json')
       .then(function (response) {
@@ -41,7 +28,6 @@ $(document).ready(function () {
         var users = getUsers();
 
         $.each(demoUsers, function (index, demo) {
-          // add the demo user only if this email is not registered yet
           var exists = users.filter(function (u) { return u.email === demo.email; }).length > 0;
           if (!exists) {
             users.push(demo);
@@ -52,12 +38,12 @@ $(document).ready(function () {
         localStorage.setItem('bookverseDemoLoaded', 'yes');
       })
       .catch(function (error) {
-        console.log(error); // the site still works, only without demo accounts
+        console.log(error);
       });
   }
 
   if (currentUser) {
-    // the user is signed in: instead of Sign in / Sign up show a user icon with a menu
+    
     var menu =
       '<div class="dropdown">' +
         '<button type="button" class="btn btn-outline-light user-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">' +
@@ -78,28 +64,25 @@ $(document).ready(function () {
       '</div>';
 
     $('#auth-buttons').html(menu);
-    $('#menu-name').text(currentUser.name); // .text() so the name is shown as plain text
+    $('#menu-name').text(currentUser.name); 
     markActiveTheme();
   }
 
-  // show which theme is active in the menu
   function markActiveTheme() {
     var theme = $('html').attr('data-theme');
     $('.theme-btn').removeClass('active');
     $('.theme-btn[data-theme="' + theme + '"]').addClass('active');
   }
 
-  // click on "Theme: Light" or "Theme: Dark"
   $(document).on('click', '.theme-btn', function () {
     var theme = $(this).attr('data-theme');
-    localStorage.setItem('bookverseTheme', theme); // save the choice
+    localStorage.setItem('bookverseTheme', theme); 
     applyTheme(theme);
     markActiveTheme();
   });
 
-  // click on "Log out"
   $(document).on('click', '#signout-btn', function () {
-    localStorage.removeItem('bookverseCurrentUser'); // clear the saved login state
+    localStorage.removeItem('bookverseCurrentUser');
     window.location.href = 'index.html';
   });
   if ($('#search-input').length) {
@@ -228,7 +211,7 @@ $(document).ready(function () {
       var confirmOk = checkConfirm();
 
       if (nameOk && emailOk && passwordOk && confirmOk) {
-        // save the new user in localStorage (demo only, no server)
+        
         var users = getUsers();
         var email = $('#reg-email').val().trim().toLowerCase();
 
@@ -258,7 +241,7 @@ $(document).ready(function () {
   }
 
   if ($('#signin-form').length) {
-    // if the user is already signed in, hide the form and show a message
+    
     if (currentUser) {
       $('#signin-form').hide();
       $('#signin-result').html('<div class="alert alert-success">You are already signed in as ' +
@@ -312,7 +295,7 @@ $(document).ready(function () {
       })[0];
 
       if (user) {
-        // save the login status: only name and email, the password is not saved here
+        
         localStorage.setItem('bookverseCurrentUser', JSON.stringify({
           name: user.name,
           email: user.email
@@ -321,7 +304,7 @@ $(document).ready(function () {
         $('#signin-result').html('<div class="alert alert-success">Welcome back, ' +
           $('<span>').text(user.name).html() + '! Opening the home page...</div>');
 
-        // go to the home page after 1.5 seconds
+        
         setTimeout(function () {
           window.location.href = 'index.html';
         }, 1500);
@@ -333,7 +316,7 @@ $(document).ready(function () {
   }
 
   if ($('#list-body').length && currentUser) {
-    // every user has his own wishlist, so the key contains the email
+    
     var STORAGE_KEY = 'bookverseWishlist_' + currentUser.email;
 
     var defaultBooks = [
@@ -513,32 +496,28 @@ $(document).ready(function () {
     });
   }
 
-  // ===== Profile page =====
+  
   if ($('#profile-form').length) {
     if (!currentUser) {
-      $('#profile-guest').show(); // not signed in: show only the message
+      $('#profile-guest').show(); 
     } else {
       $('#profile-content').show();
 
       var users = getUsers();
-      // find the signed-in user in the list of all users
       var me = users.filter(function (u) { return u.email === currentUser.email; })[0];
 
       if (!me) {
-        // the account does not exist anymore: sign out
         localStorage.removeItem('bookverseCurrentUser');
         window.location.href = 'signin.html';
         return;
       }
 
-      // fill the form with the saved data
       $('#pf-first').val(me.name);
       $('#pf-last').val(me.lastName || '');
       $('#pf-email').val(me.email);
       $('#pf-birthday').val(me.birthday || '');
       $('#current-plan').text(me.plan || 'No plan');
 
-      // returns true if this genre already has a checkbox (big and small letters do not matter)
       function genreExists(name) {
         var found = false;
         $('.genre-check').each(function () {
@@ -547,11 +526,10 @@ $(document).ready(function () {
         return found;
       }
 
-      // creates a new checked checkbox for a genre written by the user
       function addGenreCheckbox(name) {
         var $label = $('<label class="form-check">');
         var $input = $('<input type="checkbox" class="form-check-input genre-check" checked>').val(name);
-        $label.append($input, $('<span>').text(' ' + name)); // .text() so the name is plain text
+        $label.append($input, $('<span>').text(' ' + name)); 
         $('#genre-list').append($label);
       }
 
@@ -560,12 +538,10 @@ $(document).ready(function () {
         $(this).prop('checked', genres.indexOf($(this).val()) !== -1);
       });
 
-      // genres that the user added before are not in the HTML, so we create them
       $.each(genres, function (index, name) {
         if (!genreExists(name)) addGenreCheckbox(name);
       });
 
-      // "Add" button for the "Other genre" field
       $('#add-genre-btn').on('click', function () {
         var name = $('#other-genre').val().trim();
 
@@ -587,7 +563,6 @@ $(document).ready(function () {
         $('#genre-error').text('');
       });
 
-      // Enter in the "Other genre" field adds the genre (and does not send the whole form)
       $('#other-genre').on('keydown', function (e) {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -595,12 +570,11 @@ $(document).ready(function () {
         }
       });
 
-      // save the changes
       $('#profile-form').on('submit', function (e) {
         e.preventDefault();
 
         var first = $('#pf-first').val().trim();
-        var birthday = $('#pf-birthday').val(); // text like "2005-03-21" or ""
+        var birthday = $('#pf-birthday').val(); 
         var today = new Date().toISOString().slice(0, 10);
 
         var firstOk = first.length >= 2;
@@ -616,7 +590,6 @@ $(document).ready(function () {
           return;
         }
 
-        // collect the checked genres into an array
         var checkedGenres = [];
         $('.genre-check:checked').each(function () {
           checkedGenres.push($(this).val());
@@ -626,9 +599,8 @@ $(document).ready(function () {
         me.lastName = $('#pf-last').val().trim();
         me.birthday = birthday;
         me.genres = checkedGenres;
-        saveUsers(users); // "me" is an object inside "users", so the list is changed too
+        saveUsers(users);
 
-        // the name can change, so update the login info and the menu too
         currentUser.name = first;
         localStorage.setItem('bookverseCurrentUser', JSON.stringify(currentUser));
         $('#menu-name').text(first);
@@ -636,7 +608,6 @@ $(document).ready(function () {
         $('#profile-result').html('<div class="alert alert-success">Your profile is saved.</div>');
       });
 
-      // delete account: first click opens the modal, the second click deletes
       var deleteModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal'));
 
       $('#delete-account-btn').on('click', function () {
@@ -653,10 +624,8 @@ $(document).ready(function () {
     }
   }
 
-  // ===== Membership page: save the plan for a signed-in user =====
   $('#plan-continue').on('click', function (e) {
-    if (!currentUser) return; // not signed in: the link opens register.html as before
-
+    if (!currentUser) return; 
     e.preventDefault();
     var plan = $('#plan').val();
 
@@ -679,15 +648,11 @@ $(document).ready(function () {
     $(this).removeClass('is-invalid');
   });
 
-  // ===== FAQ (contact.html) =====
-  // A click on a question opens or closes its answer with slideToggle().
   $('.faq-question').on('click', function () {
-    var $answer = $(this).next('.faq-answer'); // the answer right after this question
+    var $answer = $(this).next('.faq-answer'); 
     var $icon = $(this).find('.faq-icon');
 
-    $answer.slideToggle(300); // smooth sliding animation, 300 ms
-
-    // change the sign: + means closed, − means open
+    $answer.slideToggle(300); 
     if ($icon.text() === '+') {
       $icon.text('−');
       $(this).attr('aria-expanded', 'true');
@@ -697,12 +662,9 @@ $(document).ready(function () {
     }
   });
 
-  // ===== Open Library API (books.html) =====
   if ($('#api-form').length) {
     var API_URL = 'https://openlibrary.org/search.json';
-    var apiBooks = []; // books from the last search
-
-    // the wishlist of the signed-in user (the same list as on the profile page)
+    var apiBooks = []; 
     function getWishlist() {
       return JSON.parse(localStorage.getItem('bookverseWishlist_' + currentUser.email)) || [];
     }
@@ -713,7 +675,6 @@ $(document).ready(function () {
       }).length > 0;
     }
 
-    // shows an array of books as cards
     function showApiBooks(list) {
       var $box = $('#api-results');
       $box.empty();
@@ -725,7 +686,6 @@ $(document).ready(function () {
         if (book.cover) {
           $card.append($('<img class="card-img-top" loading="lazy">').attr('src', book.cover).attr('alt', book.title));
         } else {
-          // some books in the API have no cover
           $card.append('<div class="card-img-top no-cover">No cover</div>');
         }
 
@@ -737,7 +697,6 @@ $(document).ready(function () {
           .attr('href', 'https://openlibrary.org' + book.key));
 
         if (!currentUser) {
-          // a guest cannot have a wishlist
           $body.append('<a class="btn btn-outline-dark mt-2" href="signin.html">Sign in to save</a>');
         } else if (isInWishlist(book.title, book.author)) {
           $body.append('<button type="button" class="btn btn-outline-dark mt-2" disabled>In your wishlist</button>');
@@ -753,7 +712,6 @@ $(document).ready(function () {
       });
     }
 
-    // sends a request to the API and shows the result
     function searchBooks() {
       var query = $('#api-query').val().trim();
       var genre = $('#api-genre').val();
@@ -761,30 +719,27 @@ $(document).ready(function () {
         '&limit=12&fields=key,title,author_name,first_publish_year,cover_i';
 
       if (genre !== '') {
-        url = url + '&subject=' + genre; // the API finds only books of this genre
+        url = url + '&subject=' + genre; 
       }
 
-      // the user must write something or choose a genre
       if (query === '' && genre === '') {
         $('#api-status').html('<div class="alert alert-warning">Please write a title or an author, or choose a genre.</div>');
         return;
       }
 
-      // show a loading message and block the button until the answer comes
       $('#api-status').html('<div class="spinner-border spinner-border-sm me-2" role="status"></div>Loading books...');
       $('#api-results').empty();
       $('#api-form button[type="submit"]').prop('disabled', true);
 
       fetch(url)
         .then(function (response) {
-          // response.ok is false for errors like 404 or 500
           if (!response.ok) {
             throw new Error('Server error: ' + response.status);
           }
-          return response.json(); // the answer is JSON text, we turn it into an object
+          return response.json(); 
         })
         .then(function (data) {
-          // data.docs is an array of books; we keep only what we need
+          
           apiBooks = data.docs.map(function (doc) {
             return {
               title: doc.title,
@@ -804,7 +759,7 @@ $(document).ready(function () {
           showSortedBooks();
         })
         .catch(function (error) {
-          // no internet, the server is down or the answer is wrong
+          
           console.log(error);
           $('#api-status').html(
             '<div class="alert alert-danger">Sorry, we could not load the books. Please check your internet connection. ' +
@@ -816,17 +771,15 @@ $(document).ready(function () {
         });
     }
 
-    // sorts a copy of the books (the API order stays in apiBooks) and shows them
+   
     function showSortedBooks() {
       var sort = $('#api-sort').val();
-      var list = apiBooks.slice(); // a copy of the array
-
+      var list = apiBooks.slice(); 
       if (sort === 'title') {
         list.sort(function (a, b) { return a.title.localeCompare(b.title); });
       } else if (sort === 'new') {
         list.sort(function (a, b) { return (Number(b.year) || 0) - (Number(a.year) || 0); });
       } else if (sort === 'old') {
-        // books without a year go to the end
         list.sort(function (a, b) { return (Number(a.year) || 9999) - (Number(b.year) || 9999); });
       }
 
@@ -838,16 +791,12 @@ $(document).ready(function () {
       searchBooks();
     });
 
-    // a new genre needs a new request to the API
     $('#api-genre').on('change', searchBooks);
 
-    // sorting does not need a new request, we only change the order
     $('#api-sort').on('change', showSortedBooks);
 
-    // "Try again" button inside the error message
     $(document).on('click', '#api-retry', searchBooks);
 
-    // "Add to wishlist" button on a card
     $('#api-results').on('click', '.add-wish-btn', function () {
       var title = $(this).attr('data-title');
       var author = $(this).attr('data-author');
@@ -867,7 +816,6 @@ $(document).ready(function () {
       $(this).text('Added to wishlist').prop('disabled', true);
     });
 
-    // show some books when the page opens
     $('#api-query').val('classic literature');
     searchBooks();
   }
